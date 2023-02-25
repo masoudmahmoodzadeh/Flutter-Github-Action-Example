@@ -74,9 +74,8 @@ jobs:
       #          git commit -m "update"
       #          git push origin gh-pages -f
       # Upload assets to release
-      - name: Push to Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
-          tag: ${{env.my_tag}}
-          token: ${{env.my_secret}}
+      - name: Create a Release APK
+          uses: actions/upload-artifact@v2
+          with:
+            name: Files APK Generated
+            path: "build/app/outputs/apk/release/*"
