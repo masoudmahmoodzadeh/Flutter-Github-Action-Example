@@ -15,8 +15,7 @@ jobs:
       my_name: "Masoud Mahmoodzadeh"
       my_tag: "v1.0.${{github.run_number}}"
 
-    # This job will run on macos virtual machine
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
