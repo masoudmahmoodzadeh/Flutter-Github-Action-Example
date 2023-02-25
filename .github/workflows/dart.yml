@@ -46,7 +46,7 @@ jobs:
       - run: flutter clean
       - run: flutter pub get
 
-      # Flutter android apk build command.
+      # Flutter android apk build command. s
 #      - run: flutter build apk
       - run: flutter build apk --split-per-abi
 #      - run: flutter build appbundle
