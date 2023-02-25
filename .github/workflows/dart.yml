@@ -1,4 +1,4 @@
-name: Android, iOS, Web Build
+name: Android
 
 on:
   push:
