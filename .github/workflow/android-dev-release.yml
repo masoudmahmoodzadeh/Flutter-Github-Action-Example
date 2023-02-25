@@ -1,70 +1,83 @@
-name: Demo App Android Release
+name: Android, iOS, Web Build
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - master
 
 jobs:
-  version:
-    name: Create version number
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Fetch all history for all tags and branches
-        run: |
-          git fetch --prune --depth=10000
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.7
-        with:
-          versionSpec: '5.2.x'
-      - name: Use GitVersion
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.9.2
-      - name: Create version.txt with nuGetVersion
-        run: echo ${{ steps.gitversion.outputs.nuGetVersion  }} > version.txt
-      - name: Upload version.txt
-        uses: actions/upload-artifact@v2
-        with:
-          name: gitversion
-          path: version.txt
   build:
-    name: Build APK and Create release
-    needs: [ version ]
-    runs-on: ubuntu-latest
+    name: Android, iOS, Web Build
+
+    env:
+      my_secret: "${{secrets.WORKFLOW_TOKEN}}"
+      my_email: "mahmoodzadeh.masoud@gmail.com"
+      my_name: "Masoud Mahmoodzadeh"
+      my_tag: "v1.0.${{github.run_number}}"
+
+    # This job will run on macos virtual machine
+    runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-java@v1
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - run: |
+          echo "Your Repo is $my_repo"
+          echo "Your secrect token is $my_secret"
+          echo "Your email is $my_email"
+          echo "Your name is $my_name"
+      # Setup Java environment.
+      - name: Setup Java
+        uses: actions/setup-java@v3
         with:
-          java-version: '12.x'
-      - uses: subosito/flutter-action@v1
+          distribution: "zulu"
+          java-version: "18.x"
+
+      # Setup the flutter environment.
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '1.17.0'
-      - name: Get version.txt
-        uses: actions/download-artifact@v2
-        with:
-          name: gitversion
-      - name: Create new file without newline char from version.txt
-        run: tr -d '\n' < version.txt > version1.txt
-      - name: Read version
-        id: version
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: version1.txt
-      - name: Update version in YAML
-        run: sed -i 's/99.99.99+99/${{ steps.version.outputs.content }}+${{ github.run_number }}/g' pubspec.yaml
-      - name: Update KeyStore password in gradle properties
-        run: sed -i 's/#{KEYSTORE_PASS}#/${{ secrets.KEYSTORE_PASS }}/g' android/key.properties
-      - name: Update KeyStore key password in gradle properties
-        run: sed -i 's/#{KEYSTORE_KEY_PASS}#/${{ secrets.KEYSTORE_KEY_PASS }}/g' android/key.properties
+          channel: stable
+          flutter-version: "3.3.2"
+
+      - run: flutter config --enable-android
+      - run: flutter config --enable-ios
+      - run: flutter config --enable-web
+      - run: flutter clean
       - run: flutter pub get
-      - run: flutter test
-      - run: flutter build apk --release --split-per-abi
+
+      # Flutter android apk build command.
+      - run: flutter build apk
+      - run: flutter build apk --split-per-abi
       - run: flutter build appbundle
-      - name: Create a Release in GitHub
+
+#      # Flutter ios ipa build command.
+#      - run: |
+#          flutter build ios --no-codesign
+#          cd build/ios/iphoneos
+#          mkdir Payload
+#          cd Payload
+#          ln -s ../Runner.app
+#          cd ..
+#          zip -r app.ipa Payload
+      # Flutter web release command.
+#      - run: flutter build web --web-renderer html --release
+#      - run: |
+#          cd build/web
+#          git init
+#          git config --global user.email "$my_email"
+#          git config --global user.name "$my_name"
+#          git status
+#          git remote add origin https://"$my_secret"@github.com/"$my_repo"
+#          git checkout -b gh-pages
+#          git add --all
+#          git commit -m "update"
+#          git push origin gh-pages -f
+      # Upload assets to release
+      - name: Push to Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/app/outputs/apk/release/*.apk,build/app/outputs/bundle/release/app-release.aab"
-          token: ${{ secrets.GH_TOKEN }}
-          tag: ${{ steps.version.outputs.content }}
-          commit: ${{ github.sha }}
-          prerelease: true
+          artifacts: "build/app/outputs/flutter-apk/*,build/app/outputs/bundle/release/app-release.aab"
+          tag: ${{env.my_tag}}
+          token: ${{env.my_secret}}
