@@ -84,7 +84,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
-          tag_name: test
+          tag_name: my_tag
           files: |
             build/app/outputs/flutter-apk/*
         env:
