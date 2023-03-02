@@ -84,5 +84,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
+          tag_name: test
         env:
           GITHUB_REPOSITORY: masoudmahmoodzadeh/Flutter-Github-Action-Example
