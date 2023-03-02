@@ -85,5 +85,7 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           tag_name: test
+          files: |
+            build/app/outputs/flutter-apk/*
         env:
           GITHUB_REPOSITORY: masoudmahmoodzadeh/Flutter-Github-Action-Example
