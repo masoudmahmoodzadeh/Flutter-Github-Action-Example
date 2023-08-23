@@ -1,4 +1,4 @@
-# flutter Github Action Example
+# Flutter Github Action Example
 
 GitHub Actions is a continuous integration and continuous delivery (CI/CD) platform that automates build, test, and deployment pipelines. It also allows you to execute code in the repository when certain events occur, making it easy to extend and customize.
 
